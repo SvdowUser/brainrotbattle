@@ -111,6 +111,19 @@ export const MAP_DATA = buildMap();
 // ── Player spawn ──────────────────────────────────────────────────────────────
 export const PLAYER_START = { x: 13, y: 11 };
 
+// ── Building sprite overlay definitions ──────────────────────────────────────
+// spriteId = building_XX.png number (1–12)
+// tileX/tileY = top-left corner in tile coordinates
+// tileW/tileH = footprint in tiles
+// flipY = true for north-facing buildings (door at top)
+export const BUILDINGS = [
+  { spriteId: 1,  tileX: 2,  tileY: 6,  tileW: 6,  tileH: 5, flipY: false }, // Trainer's House
+  { spriteId: 2,  tileX: 9,  tileY: 6,  tileW: 4,  tileH: 5, flipY: false }, // Orb Shop
+  { spriteId: 8,  tileX: 16, tileY: 6,  tileW: 11, tileH: 5, flipY: false }, // Dr. Brain's Lab
+  { spriteId: 5,  tileX: 16, tileY: 12, tileW: 11, tileH: 5, flipY: true  }, // Market
+  { spriteId: 12, tileX: 2,  tileY: 12, tileW: 8,  tileH: 5, flipY: true  }, // Battle Arena
+];
+
 // ── Interactables ─────────────────────────────────────────────────────────────
 export const INTERACTABLES = [
   // Building A doors

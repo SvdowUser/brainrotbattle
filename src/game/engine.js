@@ -1,32 +1,35 @@
-import { InputHandler }                      from './input.js';
-import { Camera }                            from './camera.js';
-import { cfg, recalcTileSize }              from './config.js';
-import { Tilemap }                           from './tilemap.js';
-import { Renderer }                          from './renderer.js';
-import { Player }                            from './player.js';
-import { PLAYER_START, MAP_WIDTH, MAP_HEIGHT } from '../data/mapData.js';
-import { getZoneForTile }                    from '../data/zones.js';
+import { InputHandler }   from './input.js';
+import { Camera }         from './camera.js';
+import { cfg, recalcTileSize } from './config.js';
+import { Renderer }       from './renderer.js';
+import { Player }         from './player.js';
+import { MapManager }     from './mapManager.js';
+import { MAP_DEFS }       from '../data/mapsConfig.js';
 
-const GRASS_ENCOUNTER_CHANCE = 0.18; // 18% per step in tall grass
+const GRASS_ENCOUNTER_CHANCE = 0.18;
 
 export class GameEngine {
   constructor(canvas, playerData, callbacks) {
-    this.canvas    = canvas;
-    this.player    = new Player(
-      playerData?.position?.x ?? PLAYER_START.x,
-      playerData?.position?.y ?? PLAYER_START.y
-    );
-    this.starterId = playerData?.starterId ?? 1;
-    this.username  = playerData?.username  ?? 'Trainer';
-    this.callbacks = callbacks || {};
+    this.canvas     = canvas;
+    this.callbacks  = callbacks || {};
+    this.starterId  = playerData?.starterId ?? 1;
+    this.username   = playerData?.username  ?? 'Trainer';
 
-    this.tilemap  = new Tilemap();
+    this.mapManager = new MapManager();
+
+    // Use saved position or default overworld spawn
+    const spawn = MAP_DEFS.overworld.entries.spawn;
+    this.player = new Player(
+      playerData?.position?.x ?? spawn.tileX,
+      playerData?.position?.y ?? spawn.tileY
+    );
+
     this.renderer = new Renderer(canvas);
     this.input    = new InputHandler();
-    this.camera   = new Camera(canvas.width, canvas.height, MAP_WIDTH, MAP_HEIGHT);
+    this.camera   = new Camera(canvas.width, canvas.height);
 
-    this._raf     = null;
-    this._running = false;
+    this._raf       = null;
+    this._running   = false;
     this._saveTimer = 0;
 
     this._handleResize = this._handleResize.bind(this);
@@ -53,6 +56,11 @@ export class GameEngine {
     const w = window.innerWidth, h = window.innerHeight;
     this.renderer.resize(w, h);
     this.camera.resize(w, h);
+    this._syncCameraBounds();
+  }
+
+  _syncCameraBounds() {
+    this.camera.setMapBounds(this.mapManager.mapPixelW, this.mapManager.mapPixelH);
   }
 
   _loop() {
@@ -63,36 +71,50 @@ export class GameEngine {
   }
 
   _update() {
-    const wasOnGrass = this.tilemap.getTile(this.player.tileX, this.player.tileY) === 3;
-    this.player.update(this.input, this.tilemap);
-    this.camera.follow(this.player.pixelX, this.player.pixelY);
+    // Player movement + collision via mapManager.isBlocked()
+    this.player.update(this.input, this.mapManager);
 
-    // Interaction: space/enter while standing still
-    if (this.input.isActionPressed()) {
-      const face = this.player.getFacingTile();
-      const inter = this.tilemap.getInteractable(face.x, face.y);
-      if (inter) {
-        if (this.callbacks.onInteract) this.callbacks.onInteract(inter);
+    // Keep camera bounds current (tileSize may have changed on resize)
+    this._syncCameraBounds();
+    this.camera.follow(
+      this.player.pixelX,
+      this.player.pixelY,
+      this.mapManager.isCentered
+    );
+
+    if (!this.player._justMoved) return;
+
+    const tx = this.player.tileX;
+    const ty = this.player.tileY;
+
+    // ── Map exit transition ────────────────────────────────────────────────────
+    const exit = this.mapManager.checkExit(tx, ty);
+    if (exit) {
+      const entry = this.mapManager.transition(exit);
+      if (entry) {
+        this.player.setPosition(entry.tileX, entry.tileY);
+        this._syncCameraBounds();
+        // Force camera update for new map
+        this.camera.follow(this.player.pixelX, this.player.pixelY, this.mapManager.isCentered);
+      }
+      return;
+    }
+
+    // ── Grass encounter (tile type 2 in collision grid) ───────────────────────
+    const grid = this.mapManager.currentDef.collision;
+    if (grid.length && grid[ty]?.[tx] === 2) {
+      if (Math.random() < GRASS_ENCOUNTER_CHANCE && this.callbacks.onGrassEncounter) {
+        this.callbacks.onGrassEncounter({ name: 'Route', creatures: [] });
         return;
       }
     }
 
-    // Grass encounter: triggers when player steps onto a tall grass tile
-    if (this.player._justMoved) {
-      const tx = this.player.tileX, ty = this.player.tileY;
-      const tile = this.tilemap.getTile(tx, ty);
-      if (tile === 3) {
-        const zone = getZoneForTile(ty);
-        if (zone && Math.random() < GRASS_ENCOUNTER_CHANCE) {
-          if (this.callbacks.onGrassEncounter) {
-            this.callbacks.onGrassEncounter(zone);
-            return;
-          }
-        }
-      }
+    // ── Interaction (A/Space) ─────────────────────────────────────────────────
+    if (this.input.isActionPressed()) {
+      // Future: check facing tile for NPC / sign interactions
     }
 
-    // Auto-save position
+    // ── Auto-save position ────────────────────────────────────────────────────
     this._saveTimer++;
     if (this._saveTimer >= 180) {
       this._saveTimer = 0;
@@ -103,9 +125,13 @@ export class GameEngine {
   }
 
   _draw() {
-    const ts = cfg.tileSize;
-    this.renderer.clear();
-    this.renderer.drawTilemap(this.tilemap, this.camera);
+    const mm  = this.mapManager;
+    const ts  = cfg.tileSize;
+
+    this.renderer.clear(); // black background (shows as border for small rooms)
+    this.renderer.drawMapImage(
+      mm.currentImage, mm.mapPixelW, mm.mapPixelH, this.camera
+    );
     this.renderer.drawPlayer(
       this.player.pixelX, this.player.pixelY,
       this.camera,

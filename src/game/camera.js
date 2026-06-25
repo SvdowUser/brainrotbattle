@@ -1,37 +1,46 @@
 import { cfg } from './config.js';
 
 export class Camera {
-  constructor(viewW, viewH, mapTilesW, mapTilesH) {
+  constructor(viewW, viewH) {
+    this.viewW  = viewW;
+    this.viewH  = viewH;
+    this._mapW  = 0;
+    this._mapH  = 0;
+    this.x      = 0;
+    this.y      = 0;
+  }
+
+  // Called whenever the map changes or the window resizes.
+  setMapBounds(mapPixelW, mapPixelH) {
+    this._mapW = mapPixelW;
+    this._mapH = mapPixelH;
+  }
+
+  resize(viewW, viewH) {
     this.viewW = viewW;
     this.viewH = viewH;
-    this._mapTilesW = mapTilesW;
-    this._mapTilesH = mapTilesH;
-    this.x = 0;
-    this.y = 0;
   }
 
-  get mapW() { return this._mapTilesW * cfg.tileSize; }
-  get mapH() { return this._mapTilesH * cfg.tileSize; }
+  // Follow the player.
+  // isCentered=true: the map is smaller than the screen — center it, no scroll.
+  follow(playerPixelX, playerPixelY, isCentered = false) {
+    if (isCentered) {
+      // Negative camera.x/y means the map is drawn offset to the right/bottom.
+      // Drawing: ctx.drawImage(img, -camera.x, -camera.y, ...)
+      // So camera.x = -(offsetX) centers the map on screen.
+      this.x = -Math.max(0, (this.viewW - this._mapW) / 2);
+      this.y = -Math.max(0, (this.viewH - this._mapH) / 2);
+      return;
+    }
 
-  resize(viewW, viewH) { this.viewW = viewW; this.viewH = viewH; }
+    const ts  = cfg.tileSize;
+    this.x    = playerPixelX - this.viewW / 2 + ts / 2;
+    this.y    = playerPixelY - this.viewH / 2 + ts / 2;
 
-  follow(playerPixelX, playerPixelY) {
-    const ts = cfg.tileSize;
-    this.x = playerPixelX - this.viewW / 2 + ts / 2;
-    this.y = playerPixelY - this.viewH / 2 + ts / 2;
-    const maxX = this.mapW - this.viewW;
-    const maxY = this.mapH - this.viewH;
-    this.x = Math.max(0, Math.min(this.x, maxX > 0 ? maxX : 0));
-    this.y = Math.max(0, Math.min(this.y, maxY > 0 ? maxY : 0));
-  }
-
-  getVisibleTiles() {
-    const ts = cfg.tileSize;
-    const startCol = Math.max(0, Math.floor(this.x / ts) - 1);
-    const startRow = Math.max(0, Math.floor(this.y / ts) - 1);
-    const endCol   = startCol + Math.ceil(this.viewW / ts) + 2;
-    const endRow   = startRow + Math.ceil(this.viewH / ts) + 2;
-    return { startCol, startRow, endCol, endRow };
+    const maxX = Math.max(0, this._mapW - this.viewW);
+    const maxY = Math.max(0, this._mapH - this.viewH);
+    this.x = Math.max(0, Math.min(this.x, maxX));
+    this.y = Math.max(0, Math.min(this.y, maxY));
   }
 
   worldToScreen(wx, wy) {

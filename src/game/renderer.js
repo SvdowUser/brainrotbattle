@@ -1,5 +1,19 @@
 import { cfg, setTileCache } from './config.js';
 
+// ── Building sprite images ─────────────────────────────────────────────────────
+const _bldImgs = {};
+let   _bldLoaded = false;
+
+function ensureBuildingsLoaded() {
+  if (_bldLoaded) return;
+  _bldLoaded = true;
+  for (let i = 1; i <= 12; i++) {
+    const img = new Image();
+    img.src = `/buildings/building_${String(i).padStart(2, '0')}.png`;
+    _bldImgs[i] = img;
+  }
+}
+
 // ── Tile cache ─────────────────────────────────────────────────────────────────
 const tileCache = {};
 setTileCache(tileCache);
@@ -464,8 +478,29 @@ export class Renderer {
   }
 
   clear() {
-    this.ctx.fillStyle = '#90C848';
+    this.ctx.fillStyle = '#000000'; // black → shows as border for small rooms
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  // Draw a PNG map image scaled and offset by the camera.
+  // For centered rooms camera.x/y are negative, so -camera.x/y gives the top-left offset.
+  drawMapImage(img, mapW, mapH, camera) {
+    if (!img?.complete || !img.naturalWidth) {
+      // Image still loading — show a subtle loading hint
+      this.ctx.fillStyle = '#111';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.fillStyle = '#555';
+      this.ctx.font = `${Math.floor(cfg.tileSize * 0.4)}px 'Press Start 2P', monospace`;
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText(
+        'LOADING...',
+        this.canvas.width / 2,
+        this.canvas.height / 2
+      );
+      return;
+    }
+    this.ctx.imageSmoothingEnabled = false;
+    this.ctx.drawImage(img, -camera.x, -camera.y, mapW, mapH);
   }
 
   drawTilemap(tilemap, camera) {
@@ -509,6 +544,37 @@ export class Renderer {
     );
 
     this.frame++;
+  }
+
+  drawBuildings(buildings, camera) {
+    ensureBuildingsLoaded();
+    const ctx = this.ctx;
+    const ts  = cfg.tileSize;
+    ctx.imageSmoothingEnabled = false;
+
+    for (const bld of buildings) {
+      const img = _bldImgs[bld.spriteId];
+      if (!img?.complete || !img.naturalWidth) continue;
+
+      const sx = Math.round(bld.tileX * ts - camera.x);
+      const sy = Math.round(bld.tileY * ts - camera.y);
+      const sw = bld.tileW * ts;
+      const sh = bld.tileH * ts;
+
+      if (sx + sw < 0 || sy + sh < 0 ||
+          sx > this.canvas.width || sy > this.canvas.height) continue;
+
+      if (bld.flipY) {
+        ctx.save();
+        ctx.translate(sx, sy + sh);
+        ctx.scale(1, -1);
+        ctx.drawImage(img, 0, 0, sw, sh);
+        ctx.restore();
+      } else {
+        ctx.drawImage(img, sx, sy, sw, sh);
+      }
+    }
+    ctx.imageSmoothingEnabled = false;
   }
 
   drawNameTag(text, wx, wy, camera) {
