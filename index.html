@@ -6,54 +6,70 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a0f">
-  <meta name="description" content="Brainrock Battle — catch 20 original Brainrods in a Solana-powered 2D world.">
-  <title>Brainrock Battle</title>
+  <meta name="description" content="Brainwod Battle — catch Italian brainrot meme creatures in a Solana-powered 2D world.">
+  <title>Brainwod Battle</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
-    /* Critical inlined styles — prevent FOUC */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; background: #0a0a0f; overflow-x: hidden; }
-    body { font-family: 'Inter', system-ui, sans-serif; color: #e2e8f0; touch-action: pan-y; }
-    #root { display: block; }
-    #game-canvas { position: fixed; inset: 0; display: none; width: 100vw; height: 100vh; image-rendering: pixelated; }
-    #hud { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: none; flex-direction: row; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(10,10,15,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.08); height: 52px; }
-    #dpad { position: fixed; bottom: 24px; display: none; z-index: 100; }
+    html, body { width: 100%; height: 100%; background: #0a0a0f; overflow: hidden; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #e2e8f0; touch-action: none; }
+    #root { display: block; overflow-y: auto; height: 100%; }
+    /* Canvas fills viewport exactly — no black bars */
+    #game-canvas {
+      position: fixed; inset: 0; display: none;
+      width: 100vw; height: 100vh;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background: #3d9b40;
+    }
+    /* HUD bar */
+    #hud {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: none; flex-direction: row; align-items: center; gap: 6px;
+      padding: 6px 10px; height: 48px;
+      background: rgba(10,10,15,0.90);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    /* D-pad */
+    #dpad { position: fixed; bottom: 20px; left: 16px; display: none; z-index: 200; }
+    #dpad-action-wrap { position: fixed; bottom: 36px; right: 16px; z-index: 200; display: none; }
   </style>
 </head>
 <body>
 
-<!-- ── Landing / UI container ── -->
 <div id="root"></div>
 
-<!-- ── Game canvas ── -->
-<canvas id="game-canvas" aria-label="Brainrock Battle game world"></canvas>
+<canvas id="game-canvas" aria-label="Brainwod Battle game world"></canvas>
 
-<!-- ── In-game HUD ── -->
 <div id="hud">
-  <button class="hud-btn" id="hud-home-btn">🏠 Home</button>
+  <button class="hud-btn" id="hud-home-btn">⬅ Home</button>
   <span class="hud-stat" id="hud-name">Demo</span>
-  <button class="hud-btn" id="hud-dex-btn">BrainDex <span id="hud-dex">0/20</span></button>
+  <button class="hud-btn hud-dex" id="hud-dex-btn">BrainDex <span id="hud-dex">0/20</span></button>
   <div class="hud-divider"></div>
-  <span class="hud-stat" id="hud-gold">—</span>
+  <span class="hud-stat hud-gold" id="hud-gold">—</span>
   <button class="hud-btn" id="hud-orb-btn"><span id="hud-orbs">🧠 0</span></button>
   <button class="hud-btn" id="hud-shop-btn">Shop</button>
 </div>
 
-<!-- ── D-pad (left) + action button (right) ── -->
-<div id="dpad" style="left:24px">
+<div id="dpad">
   <div class="dpad-group">
-    <div class="dpad-btn dpad-up"    data-dir="up">▲</div>
-    <div class="dpad-btn dpad-left"  data-dir="left">◀</div>
+    <div></div>
+    <div class="dpad-btn" data-dir="up">▲</div>
+    <div></div>
+    <div class="dpad-btn" data-dir="left">◀</div>
     <div class="dpad-center"></div>
-    <div class="dpad-btn dpad-right" data-dir="right">▶</div>
-    <div class="dpad-btn dpad-down"  data-dir="down">▼</div>
+    <div class="dpad-btn" data-dir="right">▶</div>
+    <div></div>
+    <div class="dpad-btn" data-dir="down">▼</div>
+    <div></div>
   </div>
 </div>
-<div id="dpad-action-wrap" style="position:fixed;bottom:42px;right:24px;z-index:100;display:none">
+<div id="dpad-action-wrap">
   <button class="dpad-action-btn" id="dpad-action">⚡</button>
 </div>
 
