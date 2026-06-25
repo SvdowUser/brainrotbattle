@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\brainrotgame\\\\brainrotbattle\" -Recurse -Depth 3 | Where-Object { !$_.PSIsContainer } | Select-Object FullName | Format-List)",
+      "PowerShell(Get-ChildItem \"C:\\\\\", \"D:\\\\\" -Depth 3 -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq \".git\" -and $_.FullName -match \"brainrot\" } | Select-Object FullName)"
+    ]
+  }
+}

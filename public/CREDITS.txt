@@ -1,0 +1,29 @@
+BRAINROTBATTLE — ASSET CREDITS
+===============================
+
+3D Character Models — CC BY 4.0
+--------------------------------
+"Italian Brainrot Pack VOL.1" by ShowBeat Studio (@imlmw)
+https://sketchfab.com/3d-models/italian-brainrot-pack-vol1-2c36c12a0243457aa05c402c46db4660
+License: CC Attribution
+
+"Italian Brainrot Game-Ready" by Alex CGW
+https://sketchfab.com/alex.cgw
+License: CC Attribution
+
+Animations — Adobe Mixamo
+https://www.mixamo.com
+
+Fonts
+-----
+Bungee by David Jonathan Ross (SIL Open Font License)
+Inter by Rasmus Andersson (SIL Open Font License)
+
+Engine
+------
+Three.js — MIT License — https://threejs.org
+
+Game
+----
+BrainRotBattle © 2026 Mythos Mondays
+brainrotbattle.io
