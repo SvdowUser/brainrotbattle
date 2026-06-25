@@ -8,8 +8,8 @@ let _tileCache = null; // set by renderer to allow clearing on resize
 export function setTileCache(cache) { _tileCache = cache; }
 
 export function recalcTileSize() {
-  const raw = Math.floor(window.innerWidth / 14);
-  const next = Math.max(40, Math.min(raw, 72));
+  const raw = Math.floor(window.innerWidth / 20);
+  const next = Math.max(36, Math.min(raw, 52));
   if (next !== cfg.tileSize) {
     cfg.tileSize = next;
     if (_tileCache) {

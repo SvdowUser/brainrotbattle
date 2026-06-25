@@ -19,310 +19,432 @@ function buildTile(id, s) {
   return c;
 }
 
-// ── Tile drawing functions (s = tileSize) ─────────────────────────────────────
+// ── Tile drawing — pokequest.world-inspired aesthetic ─────────────────────────
 const tileFns = {
-  // 0 regular grass
+  // 0: regular grass — bright mint green with subtle dither
   0(ctx, s) {
-    ctx.fillStyle = '#3d9b40';
+    ctx.fillStyle = '#90C848';
     ctx.fillRect(0, 0, s, s);
-    // Subtle grass texture
-    ctx.fillStyle = '#358838';
-    for (let i = 0; i < 5; i++) {
-      const x = (i * 13 + 3) % (s - 3), y = (i * 17 + 2) % (s - 4);
-      ctx.fillRect(x, y, 1, 3);
-      ctx.fillRect(x + 2, y + 1, 1, 2);
-    }
-    ctx.fillStyle = '#45aa48';
-    for (let i = 0; i < 4; i++) {
-      const x = (i * 19 + 7) % (s - 3), y = (i * 11 + 6) % (s - 3);
-      ctx.fillRect(x, y, 2, 1);
-    }
+    ctx.fillStyle = '#88BC42';
+    for (let i = 0; i < s; i += 4)
+      for (let j = (i / 4 % 2) * 2; j < s; j += 4)
+        ctx.fillRect(i, j, 2, 2);
+    ctx.fillStyle = '#98D050';
+    ctx.fillRect(0, 0, 2, 2);
+    ctx.fillRect(s - 3, s - 3, 2, 2);
   },
-  // 1 stone path
+
+  // 1: stone path — warm cream/sand with clear grid
   1(ctx, s) {
-    ctx.fillStyle = '#b0a080';
+    ctx.fillStyle = '#D4BC8A';
     ctx.fillRect(0, 0, s, s);
-    // Stone tiles
-    const half = Math.floor(s / 2);
-    ctx.fillStyle = '#c0b090';
-    ctx.fillRect(1, 1, half - 2, half - 2);
-    ctx.fillRect(half + 1, half + 1, s - half - 2, s - half - 2);
-    ctx.fillStyle = '#a89070';
-    ctx.fillRect(half + 1, 1, s - half - 2, half - 2);
-    ctx.fillRect(1, half + 1, half - 2, s - half - 2);
-    // Mortar lines
-    ctx.strokeStyle = '#88704A';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(half, 0); ctx.lineTo(half, s); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, half); ctx.lineTo(s, half); ctx.stroke();
-    ctx.strokeRect(0.5, 0.5, s - 1, s - 1);
+    const h = Math.max(4, Math.floor(s / 2));
+    ctx.fillStyle = '#C8B07E';
+    ctx.fillRect(0, 0, s, 1);
+    ctx.fillRect(0, h, s, 1);
+    ctx.fillRect(0, 0, 1, s);
+    ctx.fillRect(h, 0, 1, s);
+    ctx.fillStyle = '#BCA476';
+    ctx.fillRect(1, 1, h - 2, h - 2);
+    ctx.fillRect(h + 1, h + 1, s - h - 2, s - h - 2);
+    ctx.fillStyle = '#C8B07E';
+    ctx.fillRect(h + 1, 1, s - h - 2, h - 2);
+    ctx.fillRect(1, h + 1, h - 2, s - h - 2);
   },
-  // 2 tree
+
+  // 2: tree — full round canopy (BLOCKED)
   2(ctx, s) {
-    // Forest floor
-    ctx.fillStyle = '#1a5c1e';
+    ctx.fillStyle = '#2A5C1E';
     ctx.fillRect(0, 0, s, s);
-    // Shadow underneath canopy
-    ctx.fillStyle = '#16481a';
-    ctx.beginPath();
-    ctx.ellipse(s/2 + 2, s/2 + 3, s*.44, s*.28, 0, 0, Math.PI*2);
-    ctx.fill();
+    // Shadow
+    ctx.fillStyle = '#1E4416';
+    ctx.beginPath(); ctx.ellipse(s/2+2, s/2+4, s*.42, s*.28, 0, 0, Math.PI*2); ctx.fill();
     // Trunk
-    ctx.fillStyle = '#5d3a1a';
-    ctx.fillRect(s/2 - Math.max(2, s*.07), s/2, Math.max(4, s*.14), s/2 - 2);
-    // Back canopy (dark)
-    ctx.fillStyle = '#1e6822';
-    ctx.beginPath(); ctx.arc(s/2, s/2 - s*.05, s*.36, 0, Math.PI*2); ctx.fill();
-    // Main canopy
-    ctx.fillStyle = '#28882c';
-    ctx.beginPath(); ctx.arc(s/2, s/2 - s*.1, s*.32, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(s/2 - s*.14, s/2 - s*.04, s*.22, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(s/2 + s*.14, s/2 - s*.02, s*.20, 0, Math.PI*2); ctx.fill();
-    // Highlight
-    ctx.fillStyle = '#36a83a';
-    ctx.beginPath(); ctx.arc(s/2 - s*.08, s/2 - s*.18, s*.14, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#44c048';
-    ctx.beginPath(); ctx.arc(s/2 - s*.1, s/2 - s*.22, s*.07, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#6B4020';
+    ctx.fillRect(s*.42, s*.55, s*.16, s*.44);
+    // Outer canopy
+    ctx.fillStyle = '#2E7020';
+    ctx.beginPath(); ctx.arc(s/2, s*.38, s*.42, 0, Math.PI*2); ctx.fill();
+    // Mid canopy
+    ctx.fillStyle = '#3A8A28';
+    ctx.beginPath(); ctx.arc(s/2 - s*.1, s*.30, s*.28, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s/2 + s*.12, s*.32, s*.25, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s/2, s*.22, s*.25, 0, Math.PI*2); ctx.fill();
+    // Light top
+    ctx.fillStyle = '#4AA030';
+    ctx.beginPath(); ctx.arc(s/2 - s*.08, s*.16, s*.16, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#5CB840';
+    ctx.beginPath(); ctx.arc(s/2 - s*.12, s*.12, s*.08, 0, Math.PI*2); ctx.fill();
   },
-  // 3 tall grass (encounter zone)
+
+  // 3: tall grass — encounter zone
   3(ctx, s) {
-    ctx.fillStyle = '#4ab84e';
+    ctx.fillStyle = '#68B038';
     ctx.fillRect(0, 0, s, s);
-    // Darker patches
-    ctx.fillStyle = '#3a9840';
+    ctx.fillStyle = '#5CA030';
     ctx.fillRect(0, 0, s/2, s/2);
     ctx.fillRect(s/2, s/2, s/2, s/2);
-    ctx.fillStyle = '#4ab84e';
-    ctx.fillRect(2, 2, s/2 - 4, s/2 - 4);
-    ctx.fillRect(s/2 + 2, s/2 + 2, s/2 - 4, s/2 - 4);
-    // Tall grass blades (many)
-    ctx.fillStyle = '#60d864';
-    const blades = Math.max(6, Math.floor(s / 8));
+    ctx.fillStyle = '#78C844';
+    ctx.fillRect(1, 1, s/2-2, s/2-2);
+    ctx.fillRect(s/2+1, s/2+1, s/2-2, s/2-2);
+    // Grass blades
+    ctx.fillStyle = '#8AE050';
+    const blades = Math.max(5, Math.floor(s / 9));
     for (let i = 0; i < blades; i++) {
-      const bx = (i * 7 + 2) % (s - 3);
-      const bh = Math.max(4, s * (.25 + (i % 3) * .08));
-      const by = s - 2;
-      ctx.fillRect(bx, by - bh, 2, bh);
-      ctx.fillRect(bx + 1, by - bh - 2, 1, 3);
+      const bx = (i * 7 + 3) % (s - 3);
+      const bh = s * (.32 + (i % 3) * .09);
+      ctx.fillRect(bx, s * .55 - bh, 2, bh);
+      ctx.fillRect(bx + 1, s * .5 - bh, 1, bh * .6);
     }
-    ctx.fillStyle = '#7aee7e';
-    for (let i = 0; i < 4; i++) {
-      const bx = (i * 11 + 5) % (s - 3);
-      ctx.fillRect(bx, 2, 2, Math.max(3, s * .18));
+    ctx.fillStyle = '#A0F060';
+    for (let i = 0; i < 3; i++) {
+      const bx = (i * 11 + 5) % (s - 2);
+      ctx.fillRect(bx, 3, 2, s * .2);
     }
-    // Subtle "!" hint — tiny sparkle to hint encounters
-    ctx.fillStyle = 'rgba(255,255,100,0.35)';
-    ctx.fillRect(s - 6, 2, 2, 4);
+    // Yellow sparkle hint
+    ctx.fillStyle = 'rgba(255,240,80,0.5)';
+    ctx.fillRect(s - 5, 3, 2, 3);
+    ctx.fillRect(s - 4, 2, 1, 1);
   },
-  // 4 building wall (brick)
+
+  // 4: building wall — cream/white GBA Pokémon style
   4(ctx, s) {
-    ctx.fillStyle = '#7a4030';
+    ctx.fillStyle = '#D8D4C0';
     ctx.fillRect(0, 0, s, s);
-    const brickH = Math.max(5, Math.floor(s / 5));
-    const brickW = Math.max(10, Math.floor(s / 2.5));
-    ctx.fillStyle = '#8a5040';
-    for (let row = 0; row < Math.ceil(s / brickH); row++) {
-      const offset = row % 2 === 0 ? 0 : brickW / 2;
-      for (let col = 0; col < 4; col++) {
-        const bx = Math.floor(offset + col * brickW) + 1;
-        const by = row * brickH + 1;
-        ctx.fillRect(bx, by, brickW - 2, brickH - 2);
-      }
-    }
-    // Mortar
-    ctx.fillStyle = '#5a2818';
-    for (let row = 0; row <= Math.ceil(s / brickH); row++) {
-      ctx.fillRect(0, row * brickH, s, 1);
-    }
+    // Subtle wall shading
+    ctx.fillStyle = '#C8C4B0';
+    ctx.fillRect(0, 0, 2, s);
+    ctx.fillRect(s - 2, 0, 2, s);
+    ctx.fillRect(0, 0, s, 2);
+    // Window
+    const ww = Math.max(6, s * .38), wh = Math.max(5, s * .32);
+    const wx = (s - ww) / 2, wy = s * .2;
+    ctx.fillStyle = '#90C8E8';
+    ctx.fillRect(wx, wy, ww, wh);
+    ctx.fillStyle = '#60A0C8';
+    ctx.fillRect(wx, wy, ww, wh * .5);
+    ctx.fillStyle = '#B8E8F8';
+    ctx.fillRect(wx + 2, wy + 2, ww * .4, wh * .4);
+    // Window frame
+    ctx.fillStyle = '#8080A0';
+    ctx.strokeStyle = '#8080A0';
+    ctx.lineWidth = Math.max(1, s * .05);
+    ctx.strokeRect(wx, wy, ww, wh);
+    ctx.fillRect(s/2 - 1, wy, 2, wh); // divider
   },
-  // 5 door
+
+  // 5: door
   5(ctx, s) {
-    ctx.fillStyle = '#b0a080';
+    ctx.fillStyle = '#D8D4C0';
     ctx.fillRect(0, 0, s, s);
-    const dw = Math.floor(s * .55), dh = Math.floor(s * .75);
-    const dx = Math.floor((s - dw) / 2), dy = Math.floor(s * .12);
-    // Door frame
-    ctx.fillStyle = '#3a2010';
+    const dw = s * .55, dh = s * .78;
+    const dx = (s - dw) / 2, dy = s * .08;
+    ctx.fillStyle = '#4A2810';
     ctx.fillRect(dx - 2, dy - 2, dw + 4, dh + 4);
-    // Door panel
-    ctx.fillStyle = '#6b3c1c';
+    ctx.fillStyle = '#7A4820';
     ctx.fillRect(dx, dy, dw, dh);
-    // Panel details
-    ctx.fillStyle = '#7a4822';
-    const ph = Math.floor(dh * .45);
-    ctx.fillRect(dx + 2, dy + 2, dw - 4, ph - 2);
-    ctx.fillRect(dx + 2, dy + ph + 2, dw - 4, dh - ph - 4);
-    // Door knob
+    ctx.fillStyle = '#8A5828';
+    ctx.fillRect(dx + 2, dy + 2, dw - 4, dh * .45);
+    ctx.fillRect(dx + 2, dy + dh * .5, dw - 4, dh * .45);
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.arc(dx + dw - Math.floor(dw * .22), dy + Math.floor(dh * .55), Math.max(2, Math.floor(s * .06)), 0, Math.PI*2);
+    ctx.arc(dx + dw - dw * .22, dy + dh * .52, Math.max(2, s * .06), 0, Math.PI*2);
     ctx.fill();
-    // Step
-    ctx.fillStyle = '#c0b090';
+    ctx.fillStyle = '#C0B090';
     ctx.fillRect(dx - 2, dy + dh + 2, dw + 4, 3);
   },
-  // 6 fence
+
+  // 6: fence (BLOCKED)
   6(ctx, s) {
-    ctx.fillStyle = '#3d9b40';
+    ctx.fillStyle = '#90C848';
     ctx.fillRect(0, 0, s, s);
-    const postW = Math.max(3, Math.floor(s * .12));
-    ctx.fillStyle = '#c88040';
-    ctx.fillRect(1, 0, postW, s);
-    ctx.fillRect(s - postW - 1, 0, postW, s);
-    const railY1 = Math.floor(s * .25), railY2 = Math.floor(s * .65);
-    ctx.fillRect(0, railY1, s, Math.max(2, Math.floor(s * .08)));
-    ctx.fillRect(0, railY2, s, Math.max(2, Math.floor(s * .08)));
-    ctx.fillStyle = '#a86830';
-    ctx.fillRect(1, 1, postW, postW);
-    ctx.fillRect(1, s - postW - 1, postW, postW);
-    ctx.fillRect(s - postW - 1, 1, postW, postW);
-    ctx.fillRect(s - postW - 1, s - postW - 1, postW, postW);
+    ctx.fillStyle = '#D4A864';
+    ctx.fillRect(1, 0, s * .14, s);
+    ctx.fillRect(s - s * .14 - 1, 0, s * .14, s);
+    ctx.fillRect(0, s * .22, s, s * .1);
+    ctx.fillRect(0, s * .62, s, s * .1);
+    ctx.fillStyle = '#BCA070';
+    ctx.fillRect(1, 1, s * .14, s * .14);
+    ctx.fillRect(1, s - s * .15, s * .14, s * .14);
   },
-  // 7 water
+
+  // 7: water (BLOCKED)
   7(ctx, s) {
-    ctx.fillStyle = '#1560c0';
+    ctx.fillStyle = '#2880D0';
     ctx.fillRect(0, 0, s, s);
-    // Depth gradient illusion
-    ctx.fillStyle = '#1a70d0';
-    ctx.fillRect(0, s * .3, s, s * .4);
-    ctx.fillStyle = '#2080d8';
-    ctx.fillRect(0, s * .5, s, s * .2);
-    // Ripple waves
-    ctx.strokeStyle = '#48a8f0';
-    ctx.lineWidth = Math.max(1, s * .03);
+    ctx.fillStyle = '#3090DC';
+    ctx.fillRect(0, s * .25, s, s * .5);
+    ctx.fillStyle = '#4098E8';
+    ctx.fillRect(0, s * .45, s, s * .25);
+    // Ripples
+    ctx.strokeStyle = '#70B8F8';
+    ctx.lineWidth = Math.max(1, s * .04);
     ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(s * .1, s * .38); ctx.quadraticCurveTo(s * .3, s * .32, s * .5, s * .38); ctx.quadraticCurveTo(s * .7, s * .44, s * .9, s * .38); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(s * .05, s * .62); ctx.quadraticCurveTo(s * .25, s * .56, s * .45, s * .62); ctx.quadraticCurveTo(s * .65, s * .68, s * .85, s * .62); ctx.stroke();
-    // Sparkles
-    ctx.fillStyle = 'rgba(150,200,255,0.6)';
-    ctx.fillRect(s * .15, s * .25, s * .08, s * .02);
-    ctx.fillRect(s * .65, s * .55, s * .12, s * .02);
+    ctx.beginPath();
+    ctx.moveTo(s*.05, s*.38); ctx.quadraticCurveTo(s*.25, s*.30, s*.48, s*.38);
+    ctx.quadraticCurveTo(s*.70, s*.46, s*.92, s*.38); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(s*.05, s*.60); ctx.quadraticCurveTo(s*.30, s*.52, s*.50, s*.60);
+    ctx.quadraticCurveTo(s*.70, s*.68, s*.92, s*.60); ctx.stroke();
+    ctx.fillStyle = 'rgba(160,210,255,0.5)';
+    ctx.fillRect(s*.12, s*.22, s*.1, s*.025);
+    ctx.fillRect(s*.60, s*.52, s*.14, s*.025);
   },
-  // 8 flowers
+
+  // 8: flowers
   8(ctx, s) {
-    ctx.fillStyle = '#3d9b40';
+    ctx.fillStyle = '#90C848';
     ctx.fillRect(0, 0, s, s);
-    ctx.fillStyle = '#45aa48';
-    ctx.fillRect(1, 1, s/2 - 2, s/2 - 2);
-    ctx.fillRect(s/2 + 1, s/2 + 1, s/2 - 2, s/2 - 2);
-    const r = Math.max(2, Math.floor(s * .08));
+    ctx.fillStyle = '#88BC42';
+    for (let i = 0; i < s; i += 4)
+      for (let j = (i / 4 % 2) * 2; j < s; j += 4)
+        ctx.fillRect(i, j, 2, 2);
+    const r = Math.max(2, s * .07);
     const fl = [
-      { x: s*.12, y: s*.18, c:'#ff5252' },
-      { x: s*.35, y: s*.55, c:'#ffeb3b' },
-      { x: s*.62, y: s*.20, c:'#e040fb' },
-      { x: s*.18, y: s*.72, c:'#ff9800' },
-      { x: s*.72, y: s*.65, c:'#ffffff' },
-      { x: s*.50, y: s*.38, c:'#f06292' },
+      { x: s*.14, y: s*.20, c: '#FF6080' },
+      { x: s*.38, y: s*.58, c: '#FFE040' },
+      { x: s*.65, y: s*.22, c: '#E060F0' },
+      { x: s*.20, y: s*.70, c: '#FF9040' },
+      { x: s*.72, y: s*.65, c: '#FFFFFF' },
+      { x: s*.50, y: s*.40, c: '#80E0FF' },
     ];
     fl.forEach(f => {
-      // Stem
-      ctx.fillStyle = '#2a7a2e';
-      ctx.fillRect(f.x - 1, f.y + r, 2, Math.max(3, s * .12));
-      // Petals
+      ctx.fillStyle = '#2A7020';
+      ctx.fillRect(f.x - 1, f.y + r, 2, s * .14);
       ctx.fillStyle = f.c;
       for (let i = 0; i < 5; i++) {
-        const a = (i/5)*Math.PI*2;
-        ctx.beginPath(); ctx.arc(f.x + Math.cos(a)*r*1.6, f.y + Math.sin(a)*r*1.6, r, 0, Math.PI*2); ctx.fill();
+        const a = (i / 5) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.arc(f.x + Math.cos(a)*r*1.7, f.y + Math.sin(a)*r*1.7, r, 0, Math.PI*2);
+        ctx.fill();
       }
-      // Center
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FFE060';
+      ctx.beginPath(); ctx.arc(f.x, f.y, r * .8, 0, Math.PI*2); ctx.fill();
     });
   },
-  // 9 sign
+
+  // 9: sign
   9(ctx, s) {
-    ctx.fillStyle = '#3d9b40';
+    ctx.fillStyle = '#90C848';
     ctx.fillRect(0, 0, s, s);
-    const sw = Math.floor(s * .55), sh = Math.floor(s * .40);
-    const sx = Math.floor((s - sw) / 2), sy = Math.floor(s * .15);
-    // Post
-    ctx.fillStyle = '#7a5030';
+    ctx.fillStyle = '#88BC42';
+    for (let i = 0; i < s; i += 4)
+      for (let j = (i / 4 % 2) * 2; j < s; j += 4)
+        ctx.fillRect(i, j, 2, 2);
+    const sw = s * .58, sh = s * .42;
+    const sx = (s - sw) / 2, sy = s * .12;
+    ctx.fillStyle = '#7A5030';
     ctx.fillRect(s/2 - 2, sy + sh, 4, s - sy - sh - 2);
-    // Sign board
-    ctx.fillStyle = '#6b4020';
+    ctx.fillStyle = '#7A5030';
     ctx.fillRect(sx - 1, sy - 1, sw + 2, sh + 2);
-    ctx.fillStyle = '#fff8e1';
+    ctx.fillStyle = '#FFF8E0';
     ctx.fillRect(sx, sy, sw, sh);
-    // Lines on sign (text representation)
-    ctx.fillStyle = '#5a3010';
-    const lh = Math.max(2, Math.floor(sh * .22));
-    ctx.fillRect(sx + 3, sy + lh, sw - 6, Math.max(1, lh * .6));
-    ctx.fillRect(sx + 3, sy + lh * 2.2, sw - 6, Math.max(1, lh * .6));
-    ctx.fillRect(sx + 3, sy + lh * 3.4, Math.floor((sw - 6) * .7), Math.max(1, lh * .6));
+    ctx.fillStyle = '#6A3820';
+    const lh = sh * .24;
+    ctx.fillRect(sx + 3, sy + lh,     sw - 6, Math.max(1, lh * .5));
+    ctx.fillRect(sx + 3, sy + lh*2.3, sw - 6, Math.max(1, lh * .5));
+    ctx.fillRect(sx + 3, sy + lh*3.5, (sw-6)*.65, Math.max(1, lh * .5));
   },
 };
 
-// ── Player sprite ──────────────────────────────────────────────────────────────
-function drawTrainer(ctx, cx, cy, s, direction, moving, frame, starterId) {
-  const configs = [
-    { hat:'#e53935', shirt:'#1565c0', pants:'#263238' },
-    { hat:'#1565c0', shirt:'#e53935', pants:'#1a237e' },
-    { hat:'#f9a825', shirt:'#2e7d32', pants:'#1b5e20' },
+// ── Character sprite — proper 4-direction with pre-rendered cache ─────────────
+let _spriteCache = null;
+
+function buildSprite(ts, starterId) {
+  // Sprite sheet: 3 frames wide × 4 directions tall
+  const FW = Math.round(ts * 0.9);  // frame width
+  const FH = Math.round(ts * 1.1);  // frame height (taller than 1 tile)
+  const key = `sprite_${ts}_${starterId}`;
+  if (_spriteCache?.key === key) return _spriteCache;
+
+  const FRAMES = 3;
+  const DIRS   = ['down','up','left','right'];
+  const sheet  = document.createElement('canvas');
+  sheet.width  = FW * FRAMES;
+  sheet.height = FH * DIRS.length;
+  const ctx = sheet.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  const palettes = [
+    { hat: '#E53935', brim: '#C62828', shirt: '#1565C0', pants: '#37474F', shoes: '#1A1A1A' },
+    { hat: '#1565C0', brim: '#0D47A1', shirt: '#E53935', pants: '#1A237E', shoes: '#1A1A1A' },
+    { hat: '#F9A825', brim: '#E65100', shirt: '#2E7D32', pants: '#1B5E20', shoes: '#1A1A1A' },
   ];
-  const c = configs[(starterId - 1) % 3] || configs[0];
-  const bobY = moving ? Math.sin(frame * 0.35) * (s * .04) : 0;
-  const legPhase = moving ? Math.sin(frame * 0.4) * (s * .08) : 0;
+  const pal = palettes[(starterId - 1) % 3] || palettes[0];
 
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  ctx.beginPath();
-  ctx.ellipse(cx + s*.5, cy + s - s*.04, s*.22, s*.06, 0, 0, Math.PI*2);
-  ctx.fill();
+  DIRS.forEach((dir, di) => {
+    for (let frame = 0; frame < FRAMES; frame++) {
+      const ox = frame * FW;
+      const oy = di  * FH;
+      _drawCharFrame(ctx, ox, oy, FW, FH, dir, frame, pal);
+    }
+  });
 
-  const bx = cx + s*.5, by = cy + s*.5 + bobY;
+  _spriteCache = { key, sheet, FW, FH, DIRS };
+  return _spriteCache;
+}
 
-  // Legs
-  ctx.fillStyle = c.pants;
-  ctx.fillRect(bx - s*.12, by + s*.10, s*.10, s*.28 + legPhase);
-  ctx.fillRect(bx + s*.02, by + s*.10, s*.10, s*.28 - legPhase);
-  // Shoes
-  ctx.fillStyle = '#1a1a1a';
-  ctx.fillRect(bx - s*.14, by + s*.36 + legPhase, s*.13, s*.07);
-  ctx.fillRect(bx + s*.01, by + s*.36 - legPhase, s*.13, s*.07);
+function _drawCharFrame(ctx, ox, oy, fw, fh, dir, frame, pal) {
+  // Walk offsets
+  const walk = frame === 0 ? 0 : frame === 1 ? 1 : -1;
 
-  // Body
-  ctx.fillStyle = c.shirt;
-  ctx.fillRect(bx - s*.16, by - s*.15, s*.32, s*.28);
+  // Proportions (as fractions of fh)
+  const hatH   = fh * .18;
+  const headH  = fh * .18;
+  const bodyH  = fh * .22;
+  const legH   = fh * .22;
+  const feetH  = fh * .06;
+  const totalH = hatH + headH + bodyH + legH + feetH;
+  const startY = oy + (fh - totalH) / 2;
 
-  // Arms
-  const armPhase = moving ? -legPhase : 0;
-  ctx.fillStyle = c.shirt;
-  ctx.fillRect(bx - s*.28, by - s*.12 + armPhase, s*.12, s*.24);
-  ctx.fillRect(bx + s*.16, by - s*.12 - armPhase, s*.12, s*.24);
-  // Hands
-  ctx.fillStyle = '#ffcc80';
-  ctx.fillRect(bx - s*.28, by + s*.10 + armPhase, s*.12, s*.08);
-  ctx.fillRect(bx + s*.16, by + s*.10 - armPhase, s*.12, s*.08);
+  const hatY   = startY;
+  const headY  = hatY  + hatH;
+  const bodyY  = headY + headH;
+  const legY   = bodyY + bodyH;
+  const feetY  = legY  + legH;
 
-  // Neck
-  ctx.fillStyle = '#ffcc80';
-  ctx.fillRect(bx - s*.06, by - s*.22, s*.12, s*.08);
+  const cx = ox + fw / 2;  // horizontal center
 
-  // Head
-  ctx.fillStyle = '#ffcc80';
-  ctx.fillRect(bx - s*.16, by - s*.42, s*.32, s*.24);
+  const SKIN  = '#FFCC77';
+  const HAIR  = '#3D2B1F';
+  const EYE   = '#1A1A7E';
+  const WHITE = '#FFFFFF';
 
-  // Hair under hat
-  ctx.fillStyle = '#5d3a1a';
-  ctx.fillRect(bx - s*.16, by - s*.30, s*.32, s*.06);
+  const legSwing = walk * fh * .05;
+  const armSwing = -walk * fh * .04;
+  const bob      = frame === 0 ? 0 : fh * .015;
 
-  // Hat brim
-  ctx.fillStyle = c.hat;
-  ctx.fillRect(bx - s*.22, by - s*.44, s*.44, s*.07);
-  // Hat top
-  ctx.fillRect(bx - s*.16, by - s*.60, s*.32, s*.18);
-  // Hat band
-  ctx.fillStyle = '#ffffff22';
-  ctx.fillRect(bx - s*.16, by - s*.46, s*.32, s*.04);
+  if (dir === 'down') {
+    // ─ Hat ──
+    const hatW  = fw * .78;
+    const brimW = fw * .92;
+    ctx.fillStyle = pal.hat;
+    ctx.fillRect(cx - hatW/2, hatY + bob, hatW, hatH * .8);
+    ctx.fillStyle = pal.brim;
+    ctx.fillRect(cx - brimW/2, hatY + hatH * .7 + bob, brimW, hatH * .3);
+    // ─ Face ──
+    const headW = fw * .62;
+    ctx.fillStyle = SKIN;
+    ctx.fillRect(cx - headW/2, headY + bob, headW, headH);
+    ctx.fillStyle = HAIR;
+    ctx.fillRect(cx - headW/2, headY + headH * .7 + bob, headW, headH * .25);
+    // Eyes
+    const eyeW = Math.max(2, fw * .12);
+    const eyeH = Math.max(2, fh * .06);
+    const eyeY = headY + headH * .38 + bob;
+    ctx.fillStyle = EYE;
+    ctx.fillRect(cx - fw*.22, eyeY, eyeW, eyeH);
+    ctx.fillRect(cx + fw*.10, eyeY, eyeW, eyeH);
+    ctx.fillStyle = WHITE;
+    ctx.fillRect(cx - fw*.20, eyeY, eyeW*.4, eyeH*.45);
+    ctx.fillRect(cx + fw*.12, eyeY, eyeW*.4, eyeH*.45);
+    // ─ Body ──
+    const bodyW = fw * .68;
+    ctx.fillStyle = pal.shirt;
+    ctx.fillRect(cx - bodyW/2, bodyY + bob, bodyW, bodyH);
+    // Arms
+    const armW = fw * .18, armH = bodyH * .9;
+    ctx.fillRect(cx - bodyW/2 - armW, bodyY + armSwing + bob, armW, armH);
+    ctx.fillRect(cx + bodyW/2,        bodyY - armSwing + bob, armW, armH);
+    ctx.fillStyle = SKIN;
+    ctx.fillRect(cx - bodyW/2 - armW, bodyY + armSwing + armH * .8 + bob, armW, armH * .2);
+    ctx.fillRect(cx + bodyW/2,        bodyY - armSwing + armH * .8 + bob, armW, armH * .2);
+    // ─ Legs ──
+    const legW = fw * .24;
+    ctx.fillStyle = pal.pants;
+    ctx.fillRect(cx - legW - 1, legY + legSwing + bob, legW, legH * .9);
+    ctx.fillRect(cx + 1,        legY - legSwing + bob, legW, legH * .9);
+    // Feet
+    ctx.fillStyle = pal.shoes;
+    ctx.fillRect(cx - legW - 2, feetY + legSwing + bob, legW + 3, feetH);
+    ctx.fillRect(cx,            feetY - legSwing + bob, legW + 3, feetH);
 
-  // Eyes (direction-aware)
-  if (direction !== 'up') {
-    ctx.fillStyle = '#1a237e';
-    ctx.fillRect(bx - s*.10, by - s*.32, s*.06, s*.06);
-    ctx.fillRect(bx + s*.04, by - s*.32, s*.06, s*.06);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(bx - s*.10, by - s*.34, s*.02, s*.02);
-    ctx.fillRect(bx + s*.04, by - s*.34, s*.02, s*.02);
+  } else if (dir === 'up') {
+    // ─ Hat (back) ──
+    const hatW  = fw * .78;
+    const brimW = fw * .92;
+    ctx.fillStyle = pal.hat;
+    ctx.fillRect(cx - hatW/2, hatY + bob, hatW, hatH * .8);
+    ctx.fillStyle = pal.brim;
+    ctx.fillRect(cx - brimW/2, hatY + hatH * .7 + bob, brimW, hatH * .3);
+    // ─ Back of head ── (skin + lots of hair)
+    const headW = fw * .62;
+    ctx.fillStyle = SKIN;
+    ctx.fillRect(cx - headW/2, headY + bob, headW, headH * .45);
+    ctx.fillStyle = HAIR;
+    ctx.fillRect(cx - headW/2, headY + headH * .40 + bob, headW, headH * .6);
+    // ─ Body (back) ──
+    const bodyW = fw * .68;
+    ctx.fillStyle = pal.shirt;
+    ctx.fillRect(cx - bodyW/2, bodyY + bob, bodyW, bodyH);
+    const armW = fw * .18, armH = bodyH * .9;
+    ctx.fillRect(cx - bodyW/2 - armW, bodyY - armSwing + bob, armW, armH);
+    ctx.fillRect(cx + bodyW/2,        bodyY + armSwing + bob, armW, armH);
+    ctx.fillStyle = SKIN;
+    ctx.fillRect(cx - bodyW/2 - armW, bodyY - armSwing + armH*.8 + bob, armW, armH*.2);
+    ctx.fillRect(cx + bodyW/2,        bodyY + armSwing + armH*.8 + bob, armW, armH*.2);
+    // ─ Legs ──
+    const legW = fw * .24;
+    ctx.fillStyle = pal.pants;
+    ctx.fillRect(cx - legW - 1, legY + legSwing + bob, legW, legH * .9);
+    ctx.fillRect(cx + 1,        legY - legSwing + bob, legW, legH * .9);
+    ctx.fillStyle = pal.shoes;
+    ctx.fillRect(cx - legW - 2, feetY + legSwing + bob, legW + 3, feetH);
+    ctx.fillRect(cx,            feetY - legSwing + bob, legW + 3, feetH);
+
+  } else {
+    // ─ Side view (left / right) ──
+    const flip = dir === 'right' ? 1 : -1;
+
+    // Hat side
+    const hatW = fw * .72;
+    ctx.fillStyle = pal.hat;
+    ctx.fillRect(cx - hatW/2, hatY + bob, hatW, hatH * .8);
+    ctx.fillStyle = pal.brim;
+    // Brim extends in facing direction
+    ctx.fillRect(cx - hatW/2 + (flip > 0 ? 0 : -fw*.14), hatY + hatH*.7 + bob,
+                 hatW + fw*.14, hatH*.3);
+
+    // Side face (narrower)
+    const headW = fw * .52;
+    const headOx = flip > 0 ? cx - headW/2 + fw*.06 : cx - headW/2 - fw*.06;
+    ctx.fillStyle = SKIN;
+    ctx.fillRect(headOx, headY + bob, headW, headH);
+    // Hair on non-face side
+    ctx.fillStyle = HAIR;
+    ctx.fillRect(flip > 0 ? cx - headW/2 - fw*.08 : cx + headW/2, headY + headH*.2 + bob, fw*.1, headH*.7);
+    // One eye (on facing side)
+    const eyeW = Math.max(2, fw*.11);
+    const eyeH = Math.max(2, fh*.055);
+    const eyeX = flip > 0
+      ? cx + headW/2 - eyeW - fw*.08
+      : cx - headW/2 + fw*.08;
+    ctx.fillStyle = EYE;
+    ctx.fillRect(eyeX + fw*.06, headY + headH*.38 + bob, eyeW, eyeH);
+    ctx.fillStyle = WHITE;
+    ctx.fillRect(eyeX + fw*.06, headY + headH*.38 + bob, eyeW*.4, eyeH*.4);
+
+    // Body side (slimmer)
+    const bodyW = fw * .52;
+    ctx.fillStyle = pal.shirt;
+    ctx.fillRect(cx - bodyW/2, bodyY + bob, bodyW, bodyH);
+    // One arm visible (swinging)
+    const armW = fw * .18, armH = bodyH * .9;
+    const armX = flip > 0 ? cx + bodyW/2 : cx - bodyW/2 - armW;
+    ctx.fillRect(armX, bodyY + armSwing + bob, armW, armH);
+    ctx.fillStyle = SKIN;
+    ctx.fillRect(armX, bodyY + armSwing + armH*.8 + bob, armW, armH*.2);
+
+    // Legs side (staggered)
+    const legW = fw * .22;
+    ctx.fillStyle = pal.pants;
+    ctx.fillRect(cx - legW/2,     legY + legSwing + bob, legW, legH * .9);
+    ctx.fillRect(cx - legW/2 - 3, legY - legSwing + bob, legW, legH * .9);
+    // Feet pointing in facing direction
+    const footOx = flip > 0 ? cx - legW/2 + legW*.2 : cx - legW/2 - fw*.12;
+    ctx.fillStyle = pal.shoes;
+    ctx.fillRect(footOx,              feetY + legSwing + bob, legW + fw*.2, feetH);
+    ctx.fillRect(footOx - flip*fw*.1, feetY - legSwing + bob, legW + fw*.2, feetH);
   }
 }
 
@@ -342,8 +464,7 @@ export class Renderer {
   }
 
   clear() {
-    // Fill with grass color so no black borders ever appear
-    this.ctx.fillStyle = '#3d9b40';
+    this.ctx.fillStyle = '#90C848';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
@@ -363,28 +484,49 @@ export class Renderer {
   }
 
   drawPlayer(px, py, camera, direction, moving, starterId) {
-    const ts = cfg.tileSize;
+    const ts  = cfg.tileSize;
+    const spr = buildSprite(ts, starterId);
     const { x: sx, y: sy } = camera.worldToScreen(px, py);
-    drawTrainer(this.ctx, sx, sy, ts, direction, moving, this.frame, starterId);
+
+    const DIRS  = ['down','up','left','right'];
+    const dirIdx = DIRS.indexOf(direction);
+    const frameIdx = moving ? (Math.floor(this.frame / 6) % 2) + 1 : 0;
+
+    // Draw shadow
+    const ctx = this.ctx;
+    ctx.fillStyle = 'rgba(0,0,0,0.20)';
+    ctx.beginPath();
+    ctx.ellipse(sx + ts/2, sy + ts * .92, ts * .25, ts * .07, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Draw sprite frame
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(
+      spr.sheet,
+      frameIdx * spr.FW, dirIdx * spr.FH, spr.FW, spr.FH,
+      sx + (ts - spr.FW) / 2, sy - spr.FH * .05,
+      spr.FW, spr.FH
+    );
+
     this.frame++;
   }
 
   drawNameTag(text, wx, wy, camera) {
     const { x: sx, y: sy } = camera.worldToScreen(wx, wy);
     const ctx = this.ctx;
-    const fs  = Math.max(8, Math.floor(cfg.tileSize * .18));
+    const ts  = cfg.tileSize;
+    const fs  = Math.max(7, Math.floor(ts * .15));
     ctx.save();
-    ctx.font = `bold ${fs}px monospace`;
+    ctx.font = `bold ${fs}px 'Press Start 2P', monospace`;
     ctx.textAlign = 'center';
     const w = ctx.measureText(text).width + 8;
-    ctx.fillStyle = 'rgba(0,0,0,0.7)';
-    ctx.fillRect(sx - w / 2, sy - fs - 10, w, fs + 6);
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.fillRect(sx - w / 2, sy - fs - 12, w, fs + 6);
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(text, sx, sy - 6);
+    ctx.fillText(text, sx, sy - 8);
     ctx.restore();
   }
 
-  // Used by landing page and encounter previews
   drawBrainrodAt(brainrod, cx, cy, size) {
     brainrod.draw(this.ctx, cx, cy, size, this.frame);
   }

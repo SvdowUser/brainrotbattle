@@ -1,6 +1,6 @@
 import { cfg } from './config.js';
 
-const BASE_MOVE_SPEED = 4; // pixels per frame at tileSize=48
+const BASE_MOVE_SPEED = 8; // pixels per frame at tileSize=48
 
 export class Player {
   constructor(startX, startY) {

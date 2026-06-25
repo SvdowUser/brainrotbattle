@@ -53,7 +53,7 @@ export function markHuntUsed(zoneId) {
 
 // Which zone a tile belongs to based on map row
 export function getZoneForTile(tileY) {
-  if (tileY >= 2  && tileY <= 7)  return ZONES[0];
-  if (tileY >= 49 && tileY <= 52) return ZONES[1];
+  if (tileY >= 1  && tileY <= 3)  return ZONES[0];
+  if (tileY >= 20 && tileY <= 22) return ZONES[1];
   return null;
 }
